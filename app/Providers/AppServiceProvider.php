@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Define a custom morph map for polymorphic relationships.
+        // This allows the use of 'ingredient', 'semiproduct', and 'finalproduct' as type names
+        // in the database instead of the fully qualified class names.
+        // This makes the database entries more readable and easier to manage.
         Relation::morphMap([
             'ingredient' => 'App\Models\Ingredient',
             'semiproduct' => 'App\Models\Semiproduct',
