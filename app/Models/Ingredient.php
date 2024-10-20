@@ -12,4 +12,9 @@ class Ingredient extends Model
     protected $fillable = [
         'name'
     ];
+
+    public function nutritionals()
+    {
+        return $this->morphMany(Nutritional::class, 'nutritionalable');
+    }
 }

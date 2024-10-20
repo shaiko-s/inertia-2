@@ -13,4 +13,9 @@ class Semiproduct extends Model
         'name',
         'description',
     ];
+
+    public function nutritionals()
+    {
+        return $this->morphMany(Nutritional::class, 'nutritionalable');
+    }
 }
