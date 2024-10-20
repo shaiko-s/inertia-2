@@ -12,7 +12,7 @@ defineOptions({
 
 const props = defineProps({
     ingredients: Object,
-    tableColumns: Array,
+    columnsList: Array,
     filters: Object,
     sortAZ: Boolean,
 });
@@ -35,7 +35,8 @@ const props = defineProps({
                         <!-- Table -->
                         <Table :title="$page.component.split('/')[0]"
                                description="Ingredients list for icecream production"
-                               :ingredients="props.ingredients.data"
+                               :items="props.ingredients.data"
+                               :columnsList="props.columnsList"
                                :total="props.ingredients.total"
                                :search="props.filters.search"
                                :sortAZ="props.sortAZ" />

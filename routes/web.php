@@ -8,8 +8,9 @@ use App\Http\Controllers\ProfileController;
 
 use App\Http\Controllers\PlaygroundController;
 
-use App\Http\Controllers\SemiproductController;
 use App\Http\Controllers\IngredientController;
+use App\Http\Controllers\SemiproductController;
+use App\Http\Controllers\FinalproductController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('/ingredients', IngredientController::class);
     Route::resource('/semiproducts', SemiproductController::class);
+    Route::resource('/finalproducts', FinalproductController::class);
 });
 
 Route::get('/play', [PlaygroundController::class, 'index'])

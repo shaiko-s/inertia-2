@@ -4,23 +4,29 @@ import ZA_Icon from '@/Components/Icons/Z-aIcon.vue';
 import DeleteIconButton from '@/Components/Buttons/DeleteIconButton.vue';
 import EditIconButton from '@/Components/Buttons/EditIconButton.vue';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton.vue';
+import Modal from '@/Components/Modal/Modal.vue';
 import EditModal from '@/Components/Modal/EditModal.vue';
 import DeleteModal from '@/Components/Modal/DeleteModal.vue';
 import CreateModal from '@/Components/Modal/CreateModal.vue';
 
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 
+const page = usePage();
+
 const props = defineProps({
-    ingredients: Array,
-    search: String,
     title: String,
     description: String,
+    items: Array,
+    columnsList: Object,
+    search: String,
     sortAZ: Boolean,
     total: Number,
-})
+});
+
+const baseUrl = page.url.split('?')[0];
 
 const formatDate = (date) => {
     return dayjs(date).format('DD/MM/YYYY HH:mm');
@@ -30,7 +36,7 @@ const search = ref(props.search);
 const sortAZ = ref(Boolean(props.sortAZ));
 
 const debouncedSearch = debounce((value) => {
-    router.get('/ingredients',
+    router.get(baseUrl,
         {
             search: value.search,
             sortAZ: Boolean(value.sortAZ)
@@ -46,81 +52,90 @@ watch([search, sortAZ], ([newSearch, newSortAZ]) => {
 });
 
 // Define reactive state variables
-const isCreateModalOpen = ref(false);
-const isEditModalOpen = ref(false);
-const isDeleteModalOpen = ref(false);
+const isModalOpen = ref(false);
+const isCreate = ref(false);
+const isEdit = ref(false);
+const isDelete = ref(false);
 const selectedItem = ref({});
 
 // Define methods
 const openCreateModal = () => {
-    isCreateModalOpen.value = true;
+    isModalOpen.value = true;
+    isCreate.value = true;
 };
 
 const createItem = (newItem) => {
-    router.post('/ingredients', newItem, {
+    router.post(baseUrl, newItem, {
         onSuccess: () => {
-            closeCreateModal();
+            closeModal();
         },
     });
 };
 
-const closeCreateModal = () => {
-    isCreateModalOpen.value = false;
-};
-
 const openEditModal = (item) => {
+    isModalOpen.value = true;
     selectedItem.value = { ...item };
-    isEditModalOpen.value = true;
-};
-
-const closeEditModal = () => {
-    isEditModalOpen.value = false;
+    isEdit.value = true;
 };
 
 const saveItem = (updatedItem) => {
-    router.put(`/ingredients/${updatedItem.id}`, updatedItem, {
+    router.put(`${baseUrl}/${updatedItem.id}`, updatedItem, {
         onSuccess: () => {
-            closeEditModal();
+            closeModal();
         },
     });
 };
 
 const openDeleteModal = (item) => {
+    isModalOpen.value = true;
     selectedItem.value = { ...item };
-    isDeleteModalOpen.value = true;
-};
-
-const closeDeleteModal = () => {
-    isDeleteModalOpen.value = false;
+    isDelete.value = true;
 };
 
 const deleteItem = (deletedItem) => {
-    router.delete(`/ingredients/${deletedItem.id}`,
+    router.delete(`${baseUrl}/${deletedItem.id}`,
         {
             onSuccess: () => {
-                closeDeleteModal();
+                closeModal();
             },
         });
 };
+
+const closeModal = () => {
+    isModalOpen.value = false;
+    isCreate.value = false;
+    isEdit.value = false;
+    isDelete.value = false;
+    };
+
 </script>
 
 
 <template>
-    <!-- Edit Modal -->
-    <EditModal :isOpen="isEditModalOpen"
-               :item="selectedItem"
-               @close="closeEditModal"
-               @save="saveItem" />
+    <Modal :show="isModalOpen && (isCreate || isEdit || isDelete)"
+           @close="closeModal"
+           maxWidth="2xl">
+        <!-- Edit Modal -->
+        <EditModal :isOpen="isEdit"
+                   :item="selectedItem"
+                   :columnsList="props.columnsList"
+                   @close="closeModal"
+                   @save="saveItem" />
 
-    <!-- Delete Modal -->
-    <DeleteModal :isOpen="isDeleteModalOpen"
-                 :item="selectedItem"
-                 @close="closeDeleteModal"
-                 @delete="deleteItem" />
+        <!-- Delete Modal -->
+        <DeleteModal :isOpen="isDelete"
+                     :item="selectedItem"
+                     :columnsList="props.columnsList"
+                     @close="closeModal"
+                     @delete="deleteItem" />
 
-    <CreateModal :isOpen="isCreateModalOpen"
-                 @close="closeCreateModal"
-                 @create="createItem" />
+        <CreateModal :isOpen="isCreate"
+                     :columnsList="props.columnsList"
+                     @close="closeModal"
+                     @create="createItem" />
+    </Modal>
+
+
 
     <!-- Table Title -->
     <div class=" flex items-center justify-between">
@@ -128,7 +143,8 @@ const deleteItem = (deletedItem) => {
             <div>
                 <div class="flex items-center">
                     <h2 class="text-lg font-medium text-gray-800 dark:text-white">{{ title }}</h2>
-                    <span class="dark:bg-gray-300 dark:text-gray-800 px-2 py-0.5 ml-2 text-xs rounded-md">{{ props.total }} items</span>
+                    <span class="dark:bg-gray-300 dark:text-gray-800 px-2 py-0.5 ml-2 text-xs rounded-md">{{ props.total
+                        }} items</span>
                 </div>
                 <!-- Table Description -->
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-300">
@@ -159,25 +175,26 @@ const deleteItem = (deletedItem) => {
                         <!-- Table Header -->
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th scope="col"
-                                    class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                                    >
+                                <th v-for="column in columnsList"
+                                    scope="col"
+                                    class="w-3/12 py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                     <button @click="sortAZ = !sortAZ"
                                             class="flex items-center gap-x-3 focus:outline-none">
-                                        <span>Ingredient</span>
-                                        <AZ_Icon v-if="sortAZ" />
-                                        <ZA_Icon v-if="!sortAZ" />
-
+                                        <span>{{ column.label }}</span>
+                                        <div v-if="column.sortable">
+                                            <AZ_Icon v-if="sortAZ" />
+                                            <ZA_Icon v-if="!sortAZ" />
+                                        </div>
                                     </button>
                                 </th>
 
                                 <th scope="col"
-                                    class="w-4/12 px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    class="w-2/12 px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                     Created at
                                 </th>
 
                                 <th scope="col"
-                                    class="relative w-1/12 py-3.5 px-4">
+                                    class="w-1/12 relative py-3.5 px-4">
                                     <span class="sr-only">Edit</span>
                                 </th>
                             </tr>
@@ -185,30 +202,31 @@ const deleteItem = (deletedItem) => {
 
                         <!-- Table Body -->
                         <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                            <tr v-for="ingredient in ingredients">
-                                <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                            <tr v-for="item in items">
+                                <td v-for="column in columnsList"
+                                    class="px-4 py-4 text-sm font-medium whitespace-nowrap">
                                     <div>
                                         <h2 class="font-medium text-gray-800 dark:text-white ">
-                                            {{ ingredient.name }}
+                                            {{ item[column.name] }}
                                         </h2>
                                     </div>
                                 </td>
-                                <td class="w-4/12 px-4 py-4 text-sm whitespace-nowrap">
+                                <td class="w-2/12 px-4 py-4 text-sm whitespace-nowrap">
                                     <div>
                                         <h4 class="text-gray-700 dark:text-gray-200">
-                                            {{ formatDate(ingredient.created_at) }}
+                                            {{ formatDate(item.created_at) }}
                                         </h4>
                                     </div>
                                 </td>
 
 
-                                <td class="px-4 py-4 text-sm whitespace-nowrap">
+                                <td class="w-1/12 px-4 py-4 text-sm whitespace-nowrap">
                                     <div class="flex items-center gap-x-6">
 
-                                        <DeleteIconButton @click="openDeleteModal(ingredient)" />
+                                        <DeleteIconButton @click="openDeleteModal(item)" />
 
 
-                                        <EditIconButton @click="openEditModal(ingredient)" />
+                                        <EditIconButton @click="openEditModal(item)" />
 
                                     </div>
                                 </td>

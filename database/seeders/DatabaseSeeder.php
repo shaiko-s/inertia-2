@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             IngredientSeeder::class,
             SemiproductSeeder::class,
+            FinalproductSeeder::class,
             // Add other seeders here
         ]);
     }

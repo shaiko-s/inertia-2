@@ -11,7 +11,7 @@ defineOptions({
 })
 
 const props = defineProps({
-    semiproducts: Object,
+    finalproducts: Object,
     columnsList: Object,
     filters: Object,
     sortAZ: Boolean,
@@ -34,15 +34,15 @@ const props = defineProps({
                     <section class="container px-4 mx-auto">
                         <!-- Table -->
                         <Table :title="$page.component.split('/')[0]"
-                               description="Semiproduct list for icecream production"
-                               :items="props.semiproducts.data"
+                               description="Finalproduct list of icecream production"
+                               :items="props.finalproducts.data"
                                :columnsList="props.columnsList"
-                               :total="props.semiproducts.total"
+                               :total="props.finalproducts.total"
                                :search="props.filters.search"
                                :sortAZ="props.sortAZ" />
 
                         <!-- Pagination -->
-                        <Pagination :links="props.semiproducts.links" />
+                        <Pagination :links="props.finalproducts.links" />
                     </section>
                 </div>
             </div>

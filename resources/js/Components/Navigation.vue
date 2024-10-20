@@ -20,6 +20,10 @@ const links = ref([
         name: 'semiproducts.index',
         title: 'Semiproducts',
     },
+    {
+        name: 'finalproducts.index',
+        title: 'Finalproducts',
+    },
 ]);
 
 const showingNavigationDropdown = ref(false);

@@ -37,7 +37,7 @@ watch(() => page.props.flash, (newFlash) => {
     <template v-for="(message, key) in $page.props.flash"
               :key="key">
         <div v-if="message"
-             class="mb-4 p-4 rounded flex justify-between items-center"
+             class="mb-4 p-2 rounded flex justify-between items-center"
              :class="classes[key]">
             {{ message }}
             <button @click="closeFlashMessage(key)"

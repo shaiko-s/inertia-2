@@ -2,7 +2,7 @@
 import DangerButton from '@/Components/Buttons/DangerButton.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Modal from '@/Components/Modal.vue';
+import Modal from '@/Components/Modal/Modal.vue';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';

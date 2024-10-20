@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ModelService;
 use App\Models\Semiproduct;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SemiproductController extends Controller
 {
+    protected $modelService;
+
+    public function __construct(ModelService $modelService)
+    {
+        $this->modelService = $modelService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -20,7 +28,6 @@ class SemiproductController extends Controller
             $sortAZ = filter_var($sortAZ, FILTER_VALIDATE_BOOLEAN);
         }
         $columnsList = $this->getFillableColumnsWithParams();
-        dd($columnsList);
 
         $semiproducts = Semiproduct::query()
             ->when($request->input('search'), function ($query, $search) {
@@ -32,14 +39,15 @@ class SemiproductController extends Controller
 
         return Inertia::render('Semiproducts/Index', [
             'semiproducts' => $semiproducts,
+            'columnsList' => $columnsList,
             'filters' => $request->only(['search']),
-            // 'sortAZ' => $sortAZ,
-            // 'flash' => [
-            //     'success' => $request->session()->get('success'),
-            //     'error' => $request->session()->get('error'),
-            //     'warning' => $request->session()->get('warning'),
-            //     'info' => $request->session()->get('info'),
-            // ],
+            'sortAZ' => $sortAZ,
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+                'info' => $request->session()->get('info'),
+            ],
         ]);
     }
 
@@ -56,7 +64,18 @@ class SemiproductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'string|max:255',
+        ]);
+
+        // Create a new ingredient with the validated data
+        Semiproduct::create($validatedData);
+
+        // Redirect to the index route with a success message
+        return redirect()->route('semiproducts.index')
+            ->with('success', 'Semiproduct created successfully.');
     }
 
     /**
@@ -80,7 +99,18 @@ class SemiproductController extends Controller
      */
     public function update(Request $request, Semiproduct $semiproduct)
     {
-        //
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'string|max:255',
+        ]);
+
+        // Update the ingredient with the validated data
+        $semiproduct->update($validatedData);
+
+        // Redirect to the index route with a success message
+        return redirect()->route('semiproducts.index')
+            ->with('success', 'Semiproduct updated successfully.');
     }
 
     /**
@@ -88,25 +118,16 @@ class SemiproductController extends Controller
      */
     public function destroy(Semiproduct $semiproduct)
     {
-        //
-    }
+        $semiproduct->delete();
 
+        return redirect()->route('semiproducts.index')
+            ->with('success', 'Semiproduct deleted successfully.');
+    }
     /**
      * Get the list of fillable columns with additional parameters.
      */
     public function getFillableColumnsWithParams()
     {
-        $fillableColumns = (new Semiproduct())->getFillable();
-
-        $columnsList = array_map(function ($column) {
-            return [
-                'name' => $column,
-                'label' => ucfirst(str_replace('_', ' ', $column)),
-                'sortable' => true,
-                'filterable' => true,
-            ];
-        }, $fillableColumns);
-
-        return $columnsList;
+        return $this->modelService->getFillableColumnsWithParams(Semiproduct::class);
     }
 }

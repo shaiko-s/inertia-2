@@ -7,7 +7,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Modal from '@/Components/Modal.vue';
+import Modal from '@/Components/Modal/Modal.vue';
 import NavLink from '@/Components/NavLink.vue';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';

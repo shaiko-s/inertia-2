@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use App\Services\ModelService;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
 class IngredientController extends Controller
 {
+    protected $modelService;
+
+    public function __construct(ModelService $modelService)
+    {
+        $this->modelService = $modelService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -23,7 +31,6 @@ class IngredientController extends Controller
         }
 
         $columnsList = $this->getFillableColumnsWithParams();
-        dd($columnsList);
 
         $ingredients = Ingredient::query()
             ->when($request->input('search'), function ($query, $search) {
@@ -35,6 +42,7 @@ class IngredientController extends Controller
 
         return Inertia::render('Ingredients/Index', [
             'ingredients' => $ingredients,
+            'columnsList' => $columnsList,
             'filters' => $request->only(['search']),
             'sortAZ' => $sortAZ,
             'flash' => [
@@ -58,19 +66,18 @@ class IngredientController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    { {
-            // Validate the request data
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-            ]);
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
 
-            // Create a new ingredient with the validated data
-            Ingredient::create($validatedData);
+        // Create a new ingredient with the validated data
+        Ingredient::create($validatedData);
 
-            // Redirect to the index route with a success message
-            return redirect()->route('ingredients.index')
-                ->with('success', 'Ingredient created successfully.');
-        }
+        // Redirect to the index route with a success message
+        return redirect()->route('ingredients.index')
+            ->with('success', 'Ingredient created successfully.');
     }
 
     /**
@@ -125,17 +132,6 @@ class IngredientController extends Controller
      */
     public function getFillableColumnsWithParams()
     {
-        $fillableColumns = (new Ingredient)->getFillable();
-
-        $columnsList = array_map(function ($column) {
-            return [
-                'name' => $column,
-                'label' => ucfirst(str_replace('_', ' ', $column)),
-                'sortable' => true,
-                'filterable' => true,
-            ];
-        }, $fillableColumns);
-
-        return $columnsList;
+        return $this->modelService->getFillableColumnsWithParams(Ingredient::class);
     }
 }
