@@ -13,15 +13,12 @@ return new class extends Migration
     {
         Schema::create('nutritionals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('nutritionalable_id');
-            $table->string('nutritionalable_type');
+            $table->morphs('product');
             $table->integer('calories');
             $table->integer('protein');
             $table->integer('fat');
             $table->integer('carbohydrates');
             $table->timestamps();
-
-            $table->index(['nutritionalable_id', 'nutritionalable_type']);
         });
     }
 

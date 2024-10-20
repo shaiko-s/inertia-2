@@ -9,15 +9,15 @@ class Nutritional extends Model
     use HasFactory;
 
     protected $fillable = [
+        'product_id',
+        'product_type',
         'calories',
         'protein',
         'fat',
         'carbohydrates',
-        'nutritionalable_id',
-        'nutritionalable_type',
     ];
 
-    public function nutritionalable()
+    public function product()
     {
         return $this->morphTo();
     }

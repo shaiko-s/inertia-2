@@ -15,8 +15,8 @@ class Finalproduct extends Model
         'weigth'
     ];
 
-    public function nutritionals()
+    public function nutritional()
     {
-        return $this->morphMany(Nutritional::class, 'nutritionalable');
+        return $this->morphOne(Nutritional::class, 'product');
     }
 }
